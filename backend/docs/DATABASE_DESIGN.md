@@ -26,6 +26,55 @@ recipes
 inventory_items
 ```
 
+---
+
+## Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    USERS {
+        int id PK
+        string name
+        string email
+        string password
+    }
+
+    RECIPES {
+        int id PK
+        string name
+        json tags
+        int calories
+        int time
+        string difficulty
+        float rating
+        json ingredients
+        text instructions
+    }
+
+    INVENTORY_ITEMS {
+        int id PK
+        string ingredient
+        string category
+        string quantity
+        string location
+        string purchaseDate
+        string expiryDate
+        text handling
+    }
+
+    USERS ||--o{ RECIPES : "future user-owned recipes"
+    USERS ||--o{ INVENTORY_ITEMS : "future user-owned inventory"
+```
+
+Current implementation note:
+
+```text
+The current Milestone 2 implementation uses three independent tables without foreign keys.
+The ER diagram includes future user-to-recipe and user-to-inventory relationships to show the intended scalable design for a multi-user SmartPantry system.
+```
+
+---
+
 ## 1. users Table
 
 The users table stores basic user account information for demo authentication.
@@ -44,6 +93,8 @@ Example seed data:
 ```
 
 Note: For a production system, passwords should be hashed instead of stored as plain text.
+
+---
 
 ## 2. recipes Table
 
@@ -71,11 +122,17 @@ Example seed data:
 
 This table supports:
 
-- GET /api/recipes
-- POST /api/recipes
-- GET /api/recipes/{id}
-- PUT /api/recipes/{id}
-- DELETE /api/recipes/{id}
+```text
+GET /api/recipes
+POST /api/recipes
+GET /api/recipes/{id}
+PUT /api/recipes/{id}
+DELETE /api/recipes/{id}
+GET /api/dashboard
+POST /api/ai/chat
+```
+
+---
 
 ## 3. inventory_items Table
 
@@ -105,12 +162,17 @@ Example seed data:
 
 This table supports:
 
-- GET /api/inventory
-- POST /api/inventory
-- GET /api/inventory/{id}
-- PUT /api/inventory/{id}
-- DELETE /api/inventory/{id}
-- GET /api/dashboard
+```text
+GET /api/inventory
+POST /api/inventory
+GET /api/inventory/{id}
+PUT /api/inventory/{id}
+DELETE /api/inventory/{id}
+GET /api/dashboard
+POST /api/ai/chat
+```
+
+---
 
 ## Auto-Expiry Rule
 
@@ -138,6 +200,8 @@ Dairy shelf life = 7 days
 Auto-calculated expiry date = 2026-08-02
 ```
 
+---
+
 ## Database Implementation Evidence
 
 The PostgreSQL database was created successfully.
@@ -157,6 +221,8 @@ recipes: 3 rows
 inventory_items: 6 rows
 users: 1 row
 ```
+
+---
 
 ## Database Integration
 
@@ -179,3 +245,18 @@ with app.app_context():
 ```
 
 This confirms that the backend API is integrated with the PostgreSQL database instead of using only in-memory Python lists.
+
+---
+
+## Future Database Improvements
+
+Future versions can add explicit foreign keys and relationship tables, such as:
+
+```text
+users.id -> recipes.user_id
+users.id -> inventory_items.user_id
+recipes.id -> recipe_ingredients.recipe_id
+inventory_items.id -> inventory_usage_logs.inventory_item_id
+```
+
+These additions would make the database design more scalable for multiple users and more detailed recipe-to-inventory matching.

@@ -29,6 +29,117 @@ http://127.0.0.1:5000
 | GET | /api/dashboard | Get dashboard summary |
 | POST | /api/ai/chat | Get AI assistant response |
 
+---
+
+## POST /api/register
+
+Purpose: Register a new user.
+
+Sample input:
+
+```json
+{
+  "name": "Liyi Wu",
+  "email": "liyi@example.com",
+  "password": "password123"
+}
+```
+
+Sample output:
+
+```json
+{
+  "message": "User registered successfully",
+  "user": {
+    "id": 1,
+    "name": "Liyi Wu",
+    "email": "liyi@example.com"
+  }
+}
+```
+
+---
+
+## POST /api/login
+
+Purpose: Log in an existing user.
+
+Sample input:
+
+```json
+{
+  "email": "liyi@example.com",
+  "password": "password123"
+}
+```
+
+Sample output:
+
+```json
+{
+  "message": "Login successful",
+  "user": {
+    "id": 1,
+    "name": "Liyi Wu",
+    "email": "liyi@example.com"
+  }
+}
+```
+
+---
+
+## GET /api/recipes
+
+Purpose: Retrieve all recipes from the PostgreSQL recipes table.
+
+Sample input:
+
+No request body is required.
+
+Optional query parameters:
+
+```text
+tag=Breakfast
+max_calories=400
+max_time=30
+min_rating=4.0
+search=pasta
+```
+
+Sample output:
+
+```json
+{
+  "count": 3,
+  "recipes": [
+    {
+      "id": 1,
+      "name": "Avocado Toast",
+      "tags": ["Breakfast", "Quick", "Vegetarian"],
+      "calories": 320,
+      "time": 15,
+      "difficulty": "Easy",
+      "rating": 4.6,
+      "ingredients": ["Bread", "Avocado", "Lemon", "Chili Flakes"],
+      "instructions": "Toast bread, mash avocado, season and serve."
+    },
+    {
+      "id": 2,
+      "name": "One-Pan Veggie Pasta",
+      "tags": ["Dinner", "Plant-based", "Comfort"],
+      "calories": 450,
+      "time": 30,
+      "difficulty": "Medium",
+      "rating": 4.8,
+      "ingredients": ["Pasta", "Tomatoes", "Zucchini", "Basil"],
+      "instructions": "Cook pasta, saute veggies, combine and serve."
+    }
+  ]
+}
+```
+
+---
+
 ## POST /api/recipes
 
 Purpose: Add a new recipe to the PostgreSQL recipes table.
@@ -56,13 +167,50 @@ Sample output:
   "recipe": {
     "id": 4,
     "name": "Egg Fried Rice",
+    "tags": ["Dinner", "Quick"],
     "calories": 400,
     "time": 20,
     "difficulty": "Easy",
-    "rating": 4.5
+    "rating": 4.5,
+    "ingredients": ["Eggs", "Rice", "Soy Sauce"],
+    "instructions": "Cook rice with eggs and soy sauce."
   }
 }
 ```
+
+---
+
+## GET /api/recipes/{id}
+
+Purpose: Retrieve one recipe by ID.
+
+Sample input:
+
+No request body is required.
+
+Example endpoint:
+
+```text
+GET /api/recipes/1
+```
+
+Sample output:
+
+```json
+{
+  "id": 1,
+  "name": "Avocado Toast",
+  "tags": ["Breakfast", "Quick", "Vegetarian"],
+  "calories": 320,
+  "time": 15,
+  "difficulty": "Easy",
+  "rating": 4.6,
+  "ingredients": ["Bread", "Avocado", "Lemon", "Chili Flakes"],
+  "instructions": "Toast bread, mash avocado, season and serve."
+}
+```
+
+---
 
 ## PUT /api/recipes/{id}
 
@@ -77,15 +225,46 @@ Sample input:
 }
 ```
 
-Sample database result:
+Sample output:
+
+```json
+{
+  "message": "Recipe updated",
+  "recipe": {
+    "id": 4,
+    "name": "Egg Fried Rice",
+    "tags": ["Dinner", "Quick"],
+    "calories": 420,
+    "time": 20,
+    "difficulty": "Easy",
+    "rating": 4.8,
+    "ingredients": ["Eggs", "Rice", "Soy Sauce"],
+    "instructions": "Cook rice with eggs and soy sauce."
+  }
+}
+```
+
+Database verification example:
 
 ```text
 4 | Egg Fried Rice | 420 | 4.8
 ```
 
+---
+
 ## DELETE /api/recipes/{id}
 
 Purpose: Delete a recipe from the database.
+
+Sample input:
+
+No request body is required.
+
+Example endpoint:
+
+```text
+DELETE /api/recipes/4
+```
 
 Sample output:
 
@@ -95,7 +274,67 @@ Sample output:
 }
 ```
 
+Database verification:
+
+```text
 After deletion, Egg Fried Rice no longer appears in the recipes table.
+```
+
+---
+
+## GET /api/inventory
+
+Purpose: Retrieve all inventory items with freshness status and summary data.
+
+Sample input:
+
+No request body is required.
+
+Optional query parameters:
+
+```text
+freshness=Expired
+location=Fridge
+```
+
+Sample output:
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "ingredient": "Baby Spinach",
+      "category": "Greens",
+      "quantity": "1 bag",
+      "location": "Fridge",
+      "purchaseDate": "2026-07-08",
+      "expiryDate": "2026-07-13",
+      "handling": "Keep chilled",
+      "freshness": "Expired"
+    },
+    {
+      "id": 2,
+      "ingredient": "Greek Yogurt",
+      "category": "Dairy",
+      "quantity": "2 tubs",
+      "location": "Fridge",
+      "purchaseDate": "2026-07-09",
+      "expiryDate": "2026-07-12",
+      "handling": "Use soon",
+      "freshness": "Expired"
+    }
+  ],
+  "summary": {
+    "totalItems": 6,
+    "expiringSoon": 0,
+    "expired": 6,
+    "locations": 3
+  }
+}
+```
+
+---
 
 ## POST /api/inventory
 
@@ -128,10 +367,45 @@ Sample output:
     "location": "Fridge",
     "purchaseDate": "2026-07-26",
     "expiryDate": "2026-08-02",
+    "handling": "Keep refrigerated.",
     "freshness": "Fresh"
   }
 }
 ```
+
+---
+
+## GET /api/inventory/{id}
+
+Purpose: Retrieve one inventory item by ID.
+
+Sample input:
+
+No request body is required.
+
+Example endpoint:
+
+```text
+GET /api/inventory/1
+```
+
+Sample output:
+
+```json
+{
+  "id": 1,
+  "ingredient": "Baby Spinach",
+  "category": "Greens",
+  "quantity": "1 bag",
+  "location": "Fridge",
+  "purchaseDate": "2026-07-08",
+  "expiryDate": "2026-07-13",
+  "handling": "Keep chilled",
+  "freshness": "Expired"
+}
+```
+
+---
 
 ## PUT /api/inventory/{id}
 
@@ -146,15 +420,46 @@ Sample input:
 }
 ```
 
-Sample database result:
+Sample output:
+
+```json
+{
+  "message": "Item updated",
+  "item": {
+    "id": 7,
+    "ingredient": "Eggs",
+    "category": "Dairy",
+    "quantity": "10 count",
+    "location": "Fridge",
+    "purchaseDate": "2026-07-26",
+    "expiryDate": "2026-08-02",
+    "handling": "Use within one week after opening.",
+    "freshness": "Fresh"
+  }
+}
+```
+
+Database verification example:
 
 ```text
 7 | Eggs | 10 count | Use within one week after opening.
 ```
 
+---
+
 ## DELETE /api/inventory/{id}
 
 Purpose: Delete an inventory item from the database.
+
+Sample input:
+
+No request body is required.
+
+Example endpoint:
+
+```text
+DELETE /api/inventory/7
+```
 
 Sample output:
 
@@ -164,11 +469,21 @@ Sample output:
 }
 ```
 
+Database verification:
+
+```text
 After deletion, Eggs no longer appears in the inventory_items table.
+```
+
+---
 
 ## GET /api/dashboard
 
 Purpose: Return dashboard metrics from the recipes and inventory_items tables.
+
+Sample input:
+
+No request body is required.
 
 Sample output:
 
@@ -179,10 +494,25 @@ Sample output:
     "savedRecipes": 3,
     "totalInventory": 6
   },
+  "expiredItems": [
+    {
+      "id": 1,
+      "ingredient": "Baby Spinach",
+      "category": "Greens",
+      "quantity": "1 bag",
+      "location": "Fridge",
+      "purchaseDate": "2026-07-08",
+      "expiryDate": "2026-07-13",
+      "handling": "Keep chilled",
+      "freshness": "Expired"
+    }
+  ],
   "expiringItems": [],
   "suggestedRecipes": []
 }
 ```
+
+---
 
 ## POST /api/ai/chat
 
